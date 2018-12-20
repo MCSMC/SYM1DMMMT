@@ -105,6 +105,8 @@ program BFSS
   read(unit_input_para,*) nfuzzy
   read(unit_input_para,*) mersenne_seed
   read(unit_input_para,*) imetropolis
+  read(unit_input_para,*) purebosonic
+
 
   close(unit_input_para)
   !Construc Gamma matrices. 
@@ -143,7 +145,7 @@ program BFSS
        &ntau,dtau_xmat,dtaU_alpha,neig_max,neig_min,nbc,nbmn,&
        &init,input_config,output_config,iaccelerate,acc_input,acc_output,&
        &g_alpha,g_R,RCUT,upper_approx,max_err,max_iteration,CG_log,Pol_phase,&
-       &isave,nsave,intermediate_config,imetropolis)
+       &isave,nsave,intermediate_config,imetropolis,ngauge,purebosonic)
   
   !*******************************************************
   !******  Make the intermediate configuration file ******
@@ -182,7 +184,7 @@ program BFSS
      &acceleration,g_alpha,g_R,RCUT,&
      &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf,&
      &max_err,max_iteration,iteration,&
-     &ham_init,ham_fin,ntrial,imetropolis,nsmear,s_smear,ngauge)
+     &ham_init,ham_fin,ntrial,imetropolis,nsmear,s_smear,ngauge,purebosonic)
 
      !######################
      !#### measurements ####

@@ -33,3 +33,5 @@
 1	!nfuzzy; number of fuzzy spheres. Used only when init=2.
 4357    !mersenne_seed; seed for mersenne twistor, when init is not zero.
 0	!imetropolis; 1 -> no Metropolis test (For thermalization)
+0	!purebosonic; 0 -> full theory, 1 -> only bosonic part
+

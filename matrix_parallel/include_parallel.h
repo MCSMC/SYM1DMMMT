@@ -2,6 +2,7 @@
   integer nbc !boundary condition for fermions; 0 -> pbc, 1 -> apbc
   integer nbmn ! 0 -> BFSS, 1 -> BMN
   integer ngauge ! 0 -> gauged, 1 -> ungauged
+  integer purebosonic ! 0 -> full theory, 1 -> pure bosonic part
   integer init !initial condition; 0 -> continue, 1 -> new
   integer isave !0 -> save intermediate config, 1 -> do not save
   integer nsave !saved every nsave trajectories 

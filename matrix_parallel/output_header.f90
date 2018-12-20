@@ -5,12 +5,12 @@ SUBROUTINE output_header(myrank,data_output,temperature,flux,&
      ntau,dtau_xmat,dtaU_alpha,neig_max,neig_min,nbc,nbmn,&
      &init,input_config,output_config,iaccelerate,acc_input,acc_output,&
      &g_alpha,g_R,RCUT,upper_approx,max_err,max_iteration,CG_log,Pol_phase,&
-     &isave,nsave,intermediate_config,imetropolis)
+     &isave,nsave,intermediate_config,imetropolis,ngauge,purebosonic)
 
   implicit none
   include 'size_parallel.h'
   include '../unit_number.inc'
-  integer isave,nsave
+  integer isave,nsave,ngauge,purebosonic
   character(1000) data_output,input_config,output_config,&
        &acc_input,acc_output,intermediate_config,CG_log,Pol_phase
   character(100)input_config_short,output_config_short,&
@@ -46,6 +46,16 @@ SUBROUTINE output_header(myrank,data_output,temperature,flux,&
         write(unit_measurement,*)"#BFSS matrix model"
      else if(nbmn.EQ.1)then
         write(unit_measurement,*)"#BMN matrix model"
+     end if
+     if(ngauge.eq.0) then
+        write(unit_measurement,*)"#gauged theory"
+     else
+        write(unit_measurement,*)"#ungauged theory"
+     end if
+     if(purebosonic.eq.0) then
+        write(unit_measurement,*)"#pure bosonic theory"
+     else
+        write(unit_measurement,*)"#full theory"
      end if
      if(nimprove.EQ.1)then
         write(unit_measurement,*) "#improved lattice action"
