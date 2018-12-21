@@ -414,6 +414,7 @@ SUBROUTINE calc_energy_fermion(temperature,xmat,xmat_row_2,xmat_column_2,&
   !*** Next, pf2=M^dagger*K*Phi. ***
   !*********************************
   !note that we use xmat_row_2 and xmat_column_2 for stupid historical reason.
+  call Adjust_margin_and_bc_pf(pf1,myrank,nbc)
   call Multiply_Dirac_dagger(temperature,xmat_row_2,xmat_column_2,&
      &alpha,pf1,pf2,GAMMA10d,nbmn,flux,myrank)
   !************************************
