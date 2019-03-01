@@ -1,6 +1,6 @@
 subroutine Calc_energy(temperature,xmat,alpha,energy,myers,myrank,nbmn,flux,&
      &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf,&
-     &nbc,max_err,max_iteration)
+     &nbc,max_err,max_iteration,ngauge,purebosonic)
 
   implicit none
 
@@ -8,6 +8,7 @@ subroutine Calc_energy(temperature,xmat,alpha,energy,myers,myrank,nbmn,flux,&
   include 'size_parallel.h'
   !***** input *****
   integer myrank,nbmn
+  integer ngauge,purebosonic
   double precision temperature,flux
   double complex xmat(1:nmat_block,1:nmat_block,1:ndim,&
        -(nmargin-1):nsite_local+nmargin)
@@ -147,8 +148,10 @@ subroutine Calc_energy(temperature,xmat,alpha,energy,myers,myrank,nbmn,flux,&
      myers_local=dble((0d0,-1d0)*(trx123-trx132))/dble(nmat_block*nblock)/dble(nsite_local*nsublat)
   end if
 
-  call calc_energy_fermion(temperature,xmat,xmat_row,xmat_column,&
+  if(purebosonic.eq.0) then
+    call calc_energy_fermion(temperature,xmat,xmat_row,xmat_column,&
        &alpha,GAMMA10d,nbmn,flux,myrank,sum_pf,max_err,max_iteration,nbc)
+  end if
   
   energy_local=(potential+potential_BMN)/dble(nmat_block*nblock)/dble(nsite_local*nsublat)&
        &+sum_pf

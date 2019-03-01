@@ -1,12 +1,13 @@
 SUBROUTINE measurements(xmat,alpha,nbc,nbmn,myrank,temperature,flux,&
      &GAMMA10d,neig_max,neig_min,ham_init,ham_fin,itraj,ntrial,iteration,&
      &max_err,max_iteration,ncv,n_bad_CG,nacceptance,nsmear,s_smear,&
-     &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf)
+     &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf,ngauge,purebosonic)
 
   implicit none
   include 'size_parallel.h'
   include '../unit_number.inc'
   !input
+  integer ngauge,purebosonic
   double complex xmat(1:nmat_block,1:nmat_block,1:ndim,&
        &-(nmargin-1):nsite_local+nmargin)
   double precision alpha(1:nmat_block*nblock)
@@ -33,7 +34,7 @@ SUBROUTINE measurements(xmat,alpha,nbc,nbmn,myrank,temperature,flux,&
   call Calc_Com2(xmat,com2,myrank)
   call Calc_energy(temperature,xmat,alpha,energy,myers,myrank,nbmn,flux,&
        &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf,&
-       &nbc,max_err,max_iteration)
+       &nbc,max_err,max_iteration,ngauge,purebosonic)
     
   if(myrank.EQ.0)then
      call Calc_Polyakov(nmat_block*nblock,alpha,Pol)

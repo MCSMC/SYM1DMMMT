@@ -197,7 +197,7 @@ program BFSS
         call measurements(xmat,alpha,nbc,nbmn,myrank,temperature,flux,&
              &GAMMA10d,neig_max,neig_min,ham_init,ham_fin,itraj,ntrial,iteration,&
              &max_err,max_iteration,ncv,n_bad_CG,nacceptance,nsmear,s_smear,&
-             &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf)
+             &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf,ngauge,purebosonic)
         
         
         !optimization of the Fourier acceleration parameters.
