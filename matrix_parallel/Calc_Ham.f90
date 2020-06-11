@@ -1,5 +1,6 @@
 subroutine Calc_Ham(temperature,xmat,alpha,&
-    &P_xmat,P_alpha,ham,myrank,pf,chi,acoeff_md,g_R,RCUT,nbmn,flux,ngauge,purebosonic)
+    &P_xmat,P_alpha,ham,myrank,pf,chi,acoeff_md,g_R,RCUT,nbmn,flux,ngauge,purebosonic,&
+    &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
 
     implicit none
   include 'mpif.h'
@@ -40,6 +41,9 @@ subroutine Calc_Ham(temperature,xmat,alpha,&
     double complex xmat_column(1:nmat_block*nblock,1:nmat_block,&
         &1:ndim,1:nsite_local)
 
+    double precision g_pol,pol_fix_width,pol,polfix
+    double precision g_myers,myers_fix_width,myers,myersfix
+    ! double precision polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width
 
     pi=2d0*dasin(1d0)
     lattice_spacing=1d0/temperature/dble(nsite_local*nsublat)
@@ -90,7 +94,7 @@ subroutine Calc_Ham(temperature,xmat,alpha,&
     !****************************
     !*** constraint for alpha ***
     !****************************
-
+ if(ngauge.eq.0)then
     if(myrank.EQ.0)then
         alpha_max=alpha(1)
         alpha_min=alpha(1)
@@ -105,7 +109,7 @@ subroutine Calc_Ham(temperature,xmat,alpha,&
             ham=ham-dlog(2d0*pi-(alpha_max-alpha_min))
         end if
     end if
-  
+  end if
     !****************************
     !*** constraint for TrX^2 ***
     !****************************
@@ -116,6 +120,32 @@ subroutine Calc_Ham(temperature,xmat,alpha,&
         end if
     end if
 
+  !***************************
+  !*** fixing polakov loop ***
+  !***************************
+  if((ngauge.EQ.0).AND.(g_pol.NE.0))then
+     call Calc_Polyakov(nmat_block*nblock,alpha,Pol)
+     if(myrank.EQ.0)then
+        if(pol.GT.(polfix+0.5d0*pol_fix_width))then
+           ham=ham+0.5d0*g_pol*(pol-(polfix+0.5d0*pol_fix_width))**2d0
+        else if(pol.LT.(polfix-0.5d0*pol_fix_width))then
+           ham=ham+0.5d0*g_pol*(pol-(polfix-0.5d0*pol_fix_width))**2d0
+        end if
+     end if
+  end if
+    !****************************
+    !*** constraint for Myers observable ***
+    !****************************
+  if(g_myers.NE.0)then
+     call Calc_Myers(xmat,myers,myrank)
+     if(myrank.EQ.0)then
+        if(myers.GT.(myersfix+0.5d0*myers_fix_width))then
+           ham=ham+0.5d0*g_myers*(myers-(myersfix+0.5d0*myers_fix_width))**2d0
+        else if(myers.LT.(myersfix-0.5d0*myers_fix_width))then
+           ham=ham+0.5d0*g_myers*(myers-(myersfix-0.5d0*myers_fix_width))**2d0
+        end if
+     end if
+  end if
     !******************************
     !*** Plane wave deformation ***
     !******************************

@@ -18,7 +18,7 @@ SUBROUTINE measurements(xmat,alpha,nbc,nbmn,myrank,temperature,flux,&
   double precision temperature,flux
   double complex Gamma10d(1:ndim,1:nspin,1:nspin)
   double precision max_err
-  integer max_iteration
+  integer max_iteration,idim
 
   double precision sum_trx2,trx2(1:ndim),com2,Pol,largest_eig,smallest_eig,&
        &energy,ham_fin,ham_init
@@ -61,12 +61,16 @@ SUBROUTINE measurements(xmat,alpha,nbc,nbmn,myrank,temperature,flux,&
   if(myrank.EQ.0)then
      if((neig_max.EQ.0).AND.(neig_min.EQ.0))then
         
-        write(unit_measurement,'(I8,1x,f15.9,1x,I4,1x,I8,1x,I8,15(1x,f15.7))')&
-             &itraj,ham_fin-ham_init,ncv,n_bad_CG,iteration,energy,&
-             &Pol,sum_trx2,&
-             &trx2(1),trx2(2),trx2(3),trx2(4),trx2(5),trx2(6),trx2(7),trx2(8),trx2(9),&
+        write(unit_measurement,'(I8,1x,f15.9,1x,I4,1x,I8,1x,I8)',advance="no")&
+             &itraj,ham_fin-ham_init,ncv,n_bad_CG,iteration
+        write(unit_measurement,'(3(1x,f15.7))',advance="no")&
+             &energy,Pol,sum_trx2
+        do idim=1,ndim
+           write(unit_measurement,'(f15.7,A)',advance="no")&
+             &trx2(idim)," "
+        end do
+        write(unit_measurement,'(3(1x,f15.7))')&
              &com2,myers,dble(nacceptance)/dble(ntrial)
-        
         write(*,'(I8,1x,f15.9,1x,I4,1x,I8,1x,I8,15(1x,f15.7))')&
              &itraj,ham_fin-ham_init,ncv,n_bad_CG,iteration,energy,&
              &Pol,sum_trx2,&

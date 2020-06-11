@@ -8,7 +8,8 @@ subroutine Molecular_Dynamics(nbc,temperature,&
     &ntau,dtau_xmat,dtau_alpha,xmat,alpha,P_xmat,P_alpha,&
     &acoeff_md,bcoeff_md,pf,max_iteration,max_err,iteration,&
     &gamma10d,g_alpha,g_R,RCUT,acceleration,&
-    &nbmn,flux,info,nsmear,s_smear,ngauge,purebosonic)
+    &nbmn,flux,info,nsmear,s_smear,ngauge,purebosonic,&
+    &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
 
     implicit none
 
@@ -57,6 +58,7 @@ subroutine Molecular_Dynamics(nbc,temperature,&
     !***** for MPI *****
     integer ierr,myrank
     integer iblock,jblock,isublat
+    double precision polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width
    
     call MPI_COMM_RANK(MPI_COMM_WORLD,MYRANK, IERR)
     call who_am_i(myrank,isublat,iblock,jblock)
@@ -116,7 +118,8 @@ subroutine Molecular_Dynamics(nbc,temperature,&
         !delh_xmat=dH/dX, delh_alpha=dH/(d alpha)
         call Calc_Force(delh_xmat,delh_alpha_local,xmat,alpha,&
             &chi,GAMMA10d,g_alpha,g_R,RCUT,nbmn,temperature,flux,acoeff_md,&
-            &xmat_smeared,nsmear,s_smear,ngauge,purebosonic)
+            &xmat_smeared,nsmear,s_smear,ngauge,purebosonic,&
+            &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
         call MPI_Allreduce(delh_alpha_local(1),delh_alpha(1),nmat_block*nblock,&
             &MPI_DOUBLE_PRECISION,&
             &MPI_SUM,MPI_COMM_WORLD,IERR)
@@ -187,7 +190,8 @@ subroutine Molecular_Dynamics(nbc,temperature,&
         !delh_xmat=dH/dX, delh_alpha=dH/(d alpha)
         call Calc_Force(delh_xmat,delh_alpha_local,xmat,alpha,&
             &chi,GAMMA10d,g_alpha,g_R,RCUT,nbmn,temperature,flux,acoeff_md,&
-            &xmat_smeared,nsmear,s_smear,ngauge,purebosonic)
+            &xmat_smeared,nsmear,s_smear,ngauge,purebosonic,&
+            &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
         call MPI_Allreduce(delh_alpha_local(1),delh_alpha(1),nmat_block*nblock,MPI_DOUBLE_PRECISION,&
             &MPI_SUM,MPI_COMM_WORLD,IERR)
         !Fourier transform from delh_xmat to delh_xmat_mom,

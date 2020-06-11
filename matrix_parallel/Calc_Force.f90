@@ -6,7 +6,8 @@
 ! ordering of indices. 
 SUBROUTINE Calc_Force(delh_xmat,delh_alpha,xmat,alpha,&
     chi,GAMMA10d,gcoeff_alpha,g_R,RCUT,nbmn,temperature,flux,acoeff_md,&
-    &xmat_smeared,nsmear,s_smear,ngauge,purebosonic)
+    &xmat_smeared,nsmear,s_smear,ngauge,purebosonic,&
+    &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
 
     implicit none
 
@@ -75,8 +76,8 @@ SUBROUTINE Calc_Force(delh_xmat,delh_alpha,xmat,alpha,&
     double complex mat_send(1:nmat_block,1:nmat_block,1:nsite_local,1:ndim)
     double complex mat_rcv_2(1:nmat_block,1:nmat_block,1:ndim,1:nsite_local)
     integer iblock,jblock,kblock,isublat,ishift,kblock_send,kblock_rcv
-
-
+    double precision polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width
+    double precision pol,re_pol,im_pol,myers
 
     call MPI_COMM_RANK(MPI_COMM_WORLD,MYRANK, IERR)
     call who_am_i(myrank,isublat,iblock,jblock)
@@ -1069,6 +1070,96 @@ SUBROUTINE Calc_Force(delh_xmat,delh_alpha,xmat,alpha,&
         !$omp end parallel
         end do
 
+    end if
+
+    !****************************
+    !*** fixing polyakov loop ***
+    !****************************
+    if((ngauge.EQ.0).AND.(g_pol.NE.0))then
+        if(myrank.EQ.0)then
+            !call Calc_Polyakov(nmat_block*nblock,alpha,Pol)
+            re_pol=0d0
+            im_pol=0d0
+            do imat=1,nmat_block*nblock
+                re_pol=re_pol+dcos(alpha(imat))
+                im_pol=im_pol+dsin(alpha(imat))
+            end do
+            re_pol=re_pol/dble(nmat_block*nblock)
+            im_pol=im_pol/dble(nmat_block*nblock)
+            pol=dsqrt(re_pol**2d0+im_pol**2d0)
+            if(pol.GT.(polfix+0.5d0*pol_fix_width))then
+                !ham=ham+0.5d0*g_pol*(pol-(polfix+0.5d0*pol_fix_width))**2d0
+                do imat=1,nmat_block*nblock
+                    delh_alpha(imat)=delh_alpha(imat)&
+                        &+g_pol*(pol-(polfix+0.5d0*pol_fix_width))&
+                        &/dble(nmat_block*nblock)&
+                        &*(-re_pol*dsin(alpha(imat))+im_pol*dcos(alpha(imat)))
+                end do
+            else if(pol.LT.(polfix-0.5d0*pol_fix_width))then
+                !ham=ham+0.5d0*g_pol*(pol-(polfix-0.5d0*pol_fix_width))**2d0
+                do imat=1,nmat_block*nblock
+                    delh_alpha(imat)=delh_alpha(imat)&
+                        &+g_pol*(pol-(polfix-0.5d0*pol_fix_width))&
+                        &/dble(nmat_block*nblock)&
+                        &*(-re_pol*dsin(alpha(imat))+im_pol*dcos(alpha(imat)))
+                end do
+            end if
+        end if
+    end if
+          !****************************
+      !*** constraint for Myers observable ***
+      !****************************
+    if(g_myers.NE.0)then
+        call Calc_Myers(xmat,myers,myrank)
+        ! factor 1/3 included in definition compared to action term
+        ! myers_local=dble((0d0,-1d0)*(trx123-trx132))/dble(nmat_block*nblock)/dble(nsite_local*nsublat)
+        temp=dcmplx(0d0,-1d0/dble(nmat_block*nblock)/dble(nsite_local*nsublat))
+        if(myers.GT.(myersfix+0.5d0*myers_fix_width))then
+            !ham=ham+0.5d0*g_myers*(myers-(myersfix+0.5d0*myers_fix_width))**2d0
+            temp=temp*dcmplx(g_myers*(myers-(myersfix+0.5d0*myers_fix_width)),0d0)
+        else if(myers.LT.(0.5d0-0.5d0*myers_fix_width))then
+            !ham=ham+0.5d0*g_myers*(myers-(myersfix-0.5d0*myers_fix_width))**2d0
+            temp=temp*dcmplx(g_myers*(myers-(myersfix-0.5d0*myers_fix_width)),0d0)
+        end if
+
+        do isite=1,nsite_local
+            ! this re-computation could be avoided.
+            com12=(0d0,0d0)
+            com23=(0d0,0d0)
+            com31=(0d0,0d0)
+            do imat=1,nmat_block
+                do jmat=1,nmat_block
+                    do kmat=1,nmat_block*nblock
+                        com12(imat,jmat)=com12(imat,jmat)&
+                            &+xmat_row(imat,kmat,1,isite)&
+                            &*xmat_column(kmat,jmat,2,isite)&
+                            &-xmat_row(imat,kmat,2,isite)&
+                            &*xmat_column(kmat,jmat,1,isite)
+                        com23(imat,jmat)=com23(imat,jmat)&
+                            &+xmat_row(imat,kmat,2,isite)&
+                            &*xmat_column(kmat,jmat,3,isite)&
+                            &-xmat_row(imat,kmat,3,isite)&
+                            &*xmat_column(kmat,jmat,2,isite)
+                        com31(imat,jmat)=com31(imat,jmat)&
+                            &+xmat_row(imat,kmat,3,isite)&
+                            &*xmat_column(kmat,jmat,1,isite)&
+                            &-xmat_row(imat,kmat,1,isite)&
+                            &*xmat_column(kmat,jmat,3,isite)
+                    end do
+                end do
+            end do
+
+            do imat=1,nmat_block
+                do jmat=1,nmat_block
+                    delh_xmat(imat,jmat,1,isite)=&
+                        delh_xmat(imat,jmat,1,isite)+com23(imat,jmat)*temp
+                    delh_xmat(imat,jmat,2,isite)=&
+                        delh_xmat(imat,jmat,2,isite)+com31(imat,jmat)*temp
+                    delh_xmat(imat,jmat,3,isite)=&
+                        delh_xmat(imat,jmat,3,isite)+com12(imat,jmat)*temp
+                end do
+            end do
+        end do
     end if
 
     return

@@ -5,7 +5,8 @@ SUBROUTINE output_header(myrank,data_output,temperature,flux,&
      ntau,dtau_xmat,dtaU_alpha,neig_max,neig_min,nbc,nbmn,&
      &init,input_config,output_config,iaccelerate,acc_input,acc_output,&
      &g_alpha,g_R,RCUT,upper_approx,max_err,max_iteration,CG_log,Pol_phase,&
-     &isave,nsave,intermediate_config,imetropolis,ngauge,purebosonic)
+     &isave,nsave,intermediate_config,imetropolis,ngauge,purebosonic,&
+     &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
 
   implicit none
   include 'size_parallel.h'
@@ -21,6 +22,7 @@ SUBROUTINE output_header(myrank,data_output,temperature,flux,&
   integer max_iteration
   integer neig_max,neig_min,nbmn,nbc,ntau,myrank,init,iaccelerate,imetropolis
   double precision dtau_xmat,dtau_alpha
+  double precision polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width
 
   !************************************************************
   !*** They are too long to write in the output file... :' ****
@@ -52,7 +54,7 @@ SUBROUTINE output_header(myrank,data_output,temperature,flux,&
      else
         write(unit_measurement,*)"#ungauged theory"
      end if
-     if(purebosonic.eq.0) then
+     if(purebosonic.eq.1) then
         write(unit_measurement,*)"#pure bosonic theory"
      else
         write(unit_measurement,*)"#full theory"
@@ -120,6 +122,10 @@ SUBROUTINE output_header(myrank,data_output,temperature,flux,&
      end if
      write(unit_measurement,*) "#log of the CG solver is saved in:",&
           &CG_log_short
+     write(unit_measurement,*) "# fixing Polyakov loop ",&
+          & polfix," ",g_pol," ",pol_fix_width
+     write(unit_measurement,*) "# fixing Myers term ",&
+          & myersfix," ",g_myers," ",myers_fix_width
 
      !********************************************************
      !**** Explain the ordering of the measurement output ****

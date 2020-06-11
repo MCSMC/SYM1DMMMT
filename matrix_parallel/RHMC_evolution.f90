@@ -3,7 +3,8 @@ SUBROUTINE RHMC_evolution(xmat,alpha,ncv,n_bad_CG,nacceptance,nbc,nbmn,&
     &acceleration,g_alpha,g_R,RCUT,&
     &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf,&
     &max_err,max_iteration,iteration,&
-    &ham_init,ham_fin,ntrial,imetropolis,nsmear,s_smear,ngauge,purebosonic)
+    &ham_init,ham_fin,ntrial,imetropolis,nsmear,s_smear,ngauge,purebosonic,&
+    &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
 
     use mtmod !Mersenne twistor
     implicit none
@@ -46,9 +47,9 @@ SUBROUTINE RHMC_evolution(xmat,alpha,ncv,n_bad_CG,nacceptance,nbc,nbmn,&
     double precision ham_init_local,ham_fin_local
     integer IERR,myrank
     double complex xmat_smeared(1:nmat_block,1:nmat_block,1:ndim,-(nmargin-1):nsite_local+nmargin)
+    double precision polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width
   
     call MPI_COMM_RANK(MPI_COMM_WORLD,MYRANK, IERR)
-
 
 
     !initialize info flugs
@@ -104,10 +105,11 @@ SUBROUTINE RHMC_evolution(xmat,alpha,ncv,n_bad_CG,nacceptance,nbc,nbmn,&
         !Take CG_log
         write(unit_CG_log,*)"ham_init",iteration
     end if
-
+ !   call Adjust_margin_xmat(xmat,myrank)
     call Calc_Ham(temperature,xmat,alpha,&
         &P_xmat,P_alpha,ham_init_local,myrank,pf,chi,&
-        &acoeff_md,g_R,RCUT,nbmn,flux,ngauge,purebosonic)
+        &acoeff_md,g_R,RCUT,nbmn,flux,ngauge,purebosonic,&
+        &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
     !collect ham_int to myrank=0 and calculate total value
     call MPI_Reduce(ham_init_local,ham_init,1,MPI_DOUBLE_PRECISION,&
         &MPI_SUM,0,MPI_COMM_WORLD,IERR)
@@ -116,7 +118,8 @@ SUBROUTINE RHMC_evolution(xmat,alpha,ncv,n_bad_CG,nacceptance,nbc,nbmn,&
         &ntau,dtau_xmat,dtau_alpha,xmat,alpha,P_xmat,P_alpha,&
         &acoeff_md,bcoeff_md,pf,max_iteration,max_err,iteration,&
         &gamma10d,g_alpha,g_R,RCUT,acceleration,&
-        &nbmn,flux,info_mol,nsmear,s_smear,ngauge,purebosonic)
+        &nbmn,flux,info_mol,nsmear,s_smear,ngauge,purebosonic,&
+        &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
     !info_mol=0 -> OK (CG solver converged)
     !info_mol=1 -> error (CG solver did not converge)
     if(info_mol.EQ.0)then
@@ -134,10 +137,11 @@ SUBROUTINE RHMC_evolution(xmat,alpha,ncv,n_bad_CG,nacceptance,nbc,nbmn,&
             !Take CG_log
             write(unit_CG_log,*)"ham_fin",iteration
         end if
-     
+   !     call Adjust_margin_xmat(xmat,myrank)
         call Calc_Ham(temperature,&
             &xmat,alpha,P_xmat,P_alpha,ham_fin_local,myrank,&
-            &pf,chi,acoeff_md,g_R,RCUT,nbmn,flux,ngauge,purebosonic)
+            &pf,chi,acoeff_md,g_R,RCUT,nbmn,flux,ngauge,purebosonic,&
+            &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
         !collect ham_fin to myrank=0 and calculate total value
         call MPI_Reduce(ham_fin_local,ham_fin,1,MPI_DOUBLE_PRECISION,&
             &MPI_SUM,0,MPI_COMM_WORLD,IERR)

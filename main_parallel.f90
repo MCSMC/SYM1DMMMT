@@ -58,9 +58,11 @@ program BFSS
   include 'mpif.h'
   include 'Fourier.inc'
   include 'unit_number.inc'
-  include 'matrix_parallel/include_parallel.h' 
+  include 'matrix_parallel/include_parallel.h'
+  integer info_io
   include 'matrix_parallel/remez_md.dat'
   include 'matrix_parallel/remez_pf.dat'
+
   !---------------------------------
   call MPI_INIT(IERR)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,NPROCS, IERR)
@@ -70,44 +72,52 @@ program BFSS
   !*************************
   open(unit=unit_input_para,status='OLD',file='input_matrix_v10.dat',&
        &action='READ')
-  read(unit_input_para,*) input_config
-  read(unit_input_para,*) output_config
-  read(unit_input_para,*) data_output
-  read(unit_input_para,*) Pol_phase
-  read(unit_input_para,*) intermediate_config
-  read(unit_input_para,*) acc_input
-  read(unit_input_para,*) acc_output
-  read(unit_input_para,*) CG_log
-  read(unit_input_para,*) nbc
-  read(unit_input_para,*) nbmn
-  read(unit_input_para,*) ngauge
-  read(unit_input_para,*) nsmear
-  read(unit_input_para,*) s_smear
-  read(unit_input_para,*) init
-  read(unit_input_para,*) iaccelerate
-  read(unit_input_para,*) isave
-  read(unit_input_para,*) temperature
-  read(unit_input_para,*) flux
-  read(unit_input_para,*) ntraj
-  read(unit_input_para,*) nskip
-  read(unit_input_para,*) nsave
-  read(unit_input_para,*) ntau
-  read(unit_input_para,*) dtau_xmat
-  read(unit_input_para,*) dtau_alpha
-  read(unit_input_para,*) upper_approx
-  read(unit_input_para,*) max_err
-  read(unit_input_para,*) max_iteration
-  read(unit_input_para,*) g_alpha
-  read(unit_input_para,*) g_R
-  read(unit_input_para,*) RCUT
-  read(unit_input_para,*) neig_max
-  read(unit_input_para,*) neig_min
-  read(unit_input_para,*) nfuzzy
-  read(unit_input_para,*) mersenne_seed
-  read(unit_input_para,*) imetropolis
-  read(unit_input_para,*) purebosonic
-
-
+  read(unit_input_para,*,iostat=info_io) input_config
+  read(unit_input_para,*,iostat=info_io) output_config
+  read(unit_input_para,*,iostat=info_io) data_output
+  read(unit_input_para,*,iostat=info_io) Pol_phase
+  read(unit_input_para,*,iostat=info_io) intermediate_config
+  read(unit_input_para,*,iostat=info_io) acc_input
+  read(unit_input_para,*,iostat=info_io) acc_output
+  read(unit_input_para,*,iostat=info_io) CG_log
+  read(unit_input_para,*,iostat=info_io) nbc
+  read(unit_input_para,*,iostat=info_io) nbmn
+  read(unit_input_para,*,iostat=info_io) ngauge
+  read(unit_input_para,*,iostat=info_io) nsmear
+  read(unit_input_para,*,iostat=info_io) s_smear
+  read(unit_input_para,*,iostat=info_io) init
+  read(unit_input_para,*,iostat=info_io) iaccelerate
+  read(unit_input_para,*,iostat=info_io) isave
+  read(unit_input_para,*,iostat=info_io) temperature
+  read(unit_input_para,*,iostat=info_io) flux
+  read(unit_input_para,*,iostat=info_io) ntraj
+  read(unit_input_para,*,iostat=info_io) nskip
+  read(unit_input_para,*,iostat=info_io) nsave
+  read(unit_input_para,*,iostat=info_io) ntau
+  read(unit_input_para,*,iostat=info_io) dtau_xmat
+  read(unit_input_para,*,iostat=info_io) dtau_alpha
+  read(unit_input_para,*,iostat=info_io) upper_approx
+  read(unit_input_para,*,iostat=info_io) max_err
+  read(unit_input_para,*,iostat=info_io) max_iteration
+  read(unit_input_para,*,iostat=info_io) g_alpha
+  read(unit_input_para,*,iostat=info_io) g_R
+  read(unit_input_para,*,iostat=info_io) RCUT
+  read(unit_input_para,*,iostat=info_io) neig_max
+  read(unit_input_para,*,iostat=info_io) neig_min
+  read(unit_input_para,*,iostat=info_io) nfuzzy
+  read(unit_input_para,*,iostat=info_io) mersenne_seed
+  read(unit_input_para,*,iostat=info_io) imetropolis
+  read(unit_input_para,*,iostat=info_io) purebosonic
+  ! double precision polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width
+  read(unit_input_para,*,iostat=info_io) myersfix
+  read(unit_input_para,*,iostat=info_io) g_myers
+  read(unit_input_para,*,iostat=info_io) myers_fix_width
+  read(unit_input_para,*,iostat=info_io) polfix
+  read(unit_input_para,*,iostat=info_io) g_pol
+  read(unit_input_para,*,iostat=info_io) pol_fix_width
+  if(info_io.NE.0)then
+     write (*,*) "Error when reading input file."
+  end if
   close(unit_input_para)
   !Construc Gamma matrices. 
   call MakeGamma(Gamma10d)
@@ -145,7 +155,8 @@ program BFSS
        &ntau,dtau_xmat,dtaU_alpha,neig_max,neig_min,nbc,nbmn,&
        &init,input_config,output_config,iaccelerate,acc_input,acc_output,&
        &g_alpha,g_R,RCUT,upper_approx,max_err,max_iteration,CG_log,Pol_phase,&
-       &isave,nsave,intermediate_config,imetropolis,ngauge,purebosonic)
+       &isave,nsave,intermediate_config,imetropolis,ngauge,purebosonic,&
+       &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
   
   !*******************************************************
   !******  Make the intermediate configuration file ******
@@ -184,7 +195,8 @@ program BFSS
      &acceleration,g_alpha,g_R,RCUT,&
      &acoeff_md,bcoeff_md,acoeff_pf,bcoeff_pf,&
      &max_err,max_iteration,iteration,&
-     &ham_init,ham_fin,ntrial,imetropolis,nsmear,s_smear,ngauge,purebosonic)
+     &ham_init,ham_fin,ntrial,imetropolis,nsmear,s_smear,ngauge,purebosonic,&
+     &polfix,g_pol,pol_fix_width,myersfix,g_myers,myers_fix_width)
 
      !######################
      !#### measurements ####
