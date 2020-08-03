@@ -141,8 +141,12 @@ subroutine Calc_Ham(temperature,xmat,alpha,&
      if(myrank.EQ.0)then
         if(myers.GT.(myersfix+0.5d0*myers_fix_width))then
            ham=ham+0.5d0*g_myers*(myers-(myersfix+0.5d0*myers_fix_width))**2d0
+           write (*,*) "delta H ", 0.5d0*g_myers*(myers-(myersfix+0.5d0*myers_fix_width))**2d0, " " ,ham
+           write (*,*) "myers term greater: ", myers," ", (myersfix+0.5d0*myers_fix_width)
         else if(myers.LT.(myersfix-0.5d0*myers_fix_width))then
            ham=ham+0.5d0*g_myers*(myers-(myersfix-0.5d0*myers_fix_width))**2d0
+           write (*,*) "delta H ", 0.5d0*g_myers*(myers-(myersfix-0.5d0*myers_fix_width))**2d0," ", ham
+           write (*,*) "myers term smaller: ", myers," ", (myersfix-0.5d0*myers_fix_width)
         end if
      end if
   end if
