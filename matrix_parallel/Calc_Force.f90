@@ -1116,10 +1116,10 @@ SUBROUTINE Calc_Force(delh_xmat,delh_alpha,xmat,alpha,&
         temp=dcmplx(0d0,-1d0/dble(nmat_block*nblock)/dble(nsite_local*nsublat))
         if(myers.GT.(myersfix+0.5d0*myers_fix_width))then
             !ham=ham+0.5d0*g_myers*(myers-(myersfix+0.5d0*myers_fix_width))**2d0
-            temp=temp*dcmplx(g_myers*(myers-(myersfix+0.5d0*myers_fix_width)),0d0)
-        else if(myers.LT.(0.5d0-0.5d0*myers_fix_width))then
+           temp=temp*dcmplx(g_myers*(myers-(myersfix+0.5d0*myers_fix_width)),0d0)
+        else if(myers.LT.(myersfix-0.5d0*myers_fix_width))then
             !ham=ham+0.5d0*g_myers*(myers-(myersfix-0.5d0*myers_fix_width))**2d0
-            temp=temp*dcmplx(g_myers*(myers-(myersfix-0.5d0*myers_fix_width)),0d0)
+           temp=temp*dcmplx(g_myers*(myers-(myersfix-0.5d0*myers_fix_width)),0d0)
         end if
 
         do isite=1,nsite_local
