@@ -3,7 +3,7 @@ FC=mpif90.mpich
 SOURCEDIR=THESOURCE
 # Default flags, please adapt
 # FLAGS for mpif90
-FCFLAGS= -I$(SOURCEDIR)/matrix_parallel/
+FCFLAGS=-O2 -I$(SOURCEDIR)/matrix_parallel/
 
 AR=ar
 RM=rm

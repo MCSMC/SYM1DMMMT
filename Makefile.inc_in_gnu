@@ -3,7 +3,7 @@ FC=gfortran
 SOURCEDIR=THESOURCE
 # Default flags, please adapt
 # FLAGS for gfortran
-FCFLAGS=-mcmodel=medium -I$(SOURCEDIR)/hostcode/  -I$(SOURCEDIR)/devicecode/
+FCFLAGS=-O2 -mcmodel=medium -I$(SOURCEDIR)/hostcode/  -I$(SOURCEDIR)/devicecode/
 
 AR=ar
 RM=rm
