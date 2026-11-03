@@ -1,9 +1,9 @@
-FC=mpif90.mpich
+FC=mpif90
 # Add source folder here
 SOURCEDIR=THESOURCE
 # Default flags, please adapt
 # FLAGS for mpif90
-FCFLAGS=-O2 -I$(SOURCEDIR)/matrix_parallel/
+FCFLAGS=-O2 -mcmodel=medium -I$(SOURCEDIR)/matrix_parallel/
 
 AR=ar
 RM=rm

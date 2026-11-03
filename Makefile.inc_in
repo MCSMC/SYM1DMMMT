@@ -1,6 +1,6 @@
 FC=pgfortran
 #FC=gfortran
-#FC=mpif90.mpich
+#FC=mpif90
 # Add source folder here
 SOURCEDIR=THESOURCE
 # Default flags, please adapt
