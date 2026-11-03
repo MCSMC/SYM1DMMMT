@@ -6,9 +6,9 @@ SOURCEDIR=THESOURCE
 # Default flags, please adapt
 FCFLAGS=-acc -Mcuda -ta=nvidia -mcmodel=medium -I$(SOURCEDIR)/hostcode/  -I$(SOURCEDIR)/devicecode/
 # FLAGS for gfortran
-#FCFLAGS=-mcmodel=medium -I$(SOURCEDIR)/hostcode/  -I$(SOURCEDIR)/devicecode/
+#FCFLAGS=-O2 -mcmodel=medium -I$(SOURCEDIR)/hostcode/  -I$(SOURCEDIR)/devicecode/
 # FLAGS for mpif90
-#FCFLAGS= -I$(SOURCEDIR)/matrix_parallel/
+#FCFLAGS=-O2 -I$(SOURCEDIR)/matrix_parallel/
 
 AR=ar
 RM=rm
