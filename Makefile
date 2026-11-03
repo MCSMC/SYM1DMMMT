@@ -52,6 +52,13 @@ test_timing: main_time.o ${HLIB} ${DLIB}
 bfss_mparallel: ${HLIB} main_parallel.o
 	${FC} ${FCFLAGS} main_parallel.o ${DLIB} ${HLIB}  -o $@
 
+# main_parallel.f90 does not include staticparameters.f90 (DEPENDALL) but these:
+ifeq ($(MPARALLEL),1)
+main_parallel.o: matrix_parallel/size_parallel.h matrix_parallel/include_parallel.h \
+	Fourier.inc unit_number.inc matrix_parallel/remez_md.dat matrix_parallel/remez_pf.dat \
+	matrix_parallel/mt19937.f90
+endif
+
 .PHONY: clean
 
 clean:
