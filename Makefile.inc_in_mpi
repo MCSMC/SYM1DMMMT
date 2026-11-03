@@ -3,7 +3,9 @@ FC=mpif90
 SOURCEDIR=THESOURCE
 # Default flags, please adapt
 # FLAGS for mpif90
-FCFLAGS=-O2 -mcmodel=medium -I$(SOURCEDIR)/matrix_parallel/
+# -fallow-argument-mismatch: gfortran >= 10 rejects calls to the same MPI routine
+# with different buffer types (no interfaces with mpif.h); drop it for other compilers.
+FCFLAGS=-O2 -mcmodel=medium -fallow-argument-mismatch -I$(SOURCEDIR)/matrix_parallel/
 
 AR=ar
 RM=rm
